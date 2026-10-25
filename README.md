@@ -1,165 +1,226 @@
-# 🏫 SchoolWay — Real-Time School Bus Fleet Tracking Platform (Hyderabad)
+# 🏫 SchoolWay — Real-Time School Bus Fleet Tracking & Student Safety Platform
 
-**SchoolWay** is a production-grade MERN school bus tracking and fleet operations platform built specifically for Greater Hyderabad. Designed with an ultra-tactile **Claymorphism UI**, SchoolWay guarantees that **from the very first launch and on every server start, the map is never empty**. Moving buses are visibly navigating real arterial roads in East Hyderabad right out of the box.
+<div align="center">
 
----
+[![Live Application](https://img.shields.io/badge/Live%20Application-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://school-way-eosin.vercel.app/)
+[![Node.js](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
+[![Socket.IO](https://img.shields.io/badge/Real--Time-Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=white)](https://socket.io/)
+[![Design](https://img.shields.io/badge/Design-Tactile%20Claymorphism-6366F1?style=for-the-badge)](https://school-way-eosin.vercel.app/)
 
-## ✨ Key Capabilities & Highlights
+**A modern, full-stack school bus tracking and student transit safety platform for schools, parents, and fleet operators.**  
+*Continuous road-following GPS telemetry &bull; Dynamic stop ETAs &bull; Integrated bus lost & found desk &bull; Automated boarding attendance*
 
-1. **Always-Live Hyderabad Fleet (No Empty Maps)**:
-   - On initial start or server reboot, SchoolWay automatically loads and positions **6 default buses (`SW-01` to `SW-06`)** at staggered positions along Hyderabad road networks.
-   - Visitors without an account can immediately inspect live buses, next stops, dynamic ETAs, and stop-by-stop itineraries.
-2. **Continuous Bus Simulator Engine**:
-   - Built directly into the Express server.
-   - Moves each bus along real road-snapped polylines, pauses for realistic dwell times at each stop for student boarding, completes round trips, and reverses continuously.
-   - Real-world telemetry variation: speed ranging between 15–45 km/h, slows near stops, occasional simulated traffic delays triggering advisories.
-   - **Driver Takeover**: If a driver begins a manual trip, the simulator automatically pauses for that vehicle; once finished, autonomous simulation seamlessly resumes.
-3. **Switchable Telemetry Speeds**:
-   - **`SIM_MODE=demo`**: High-speed presentation mode with new GPS points every **3 seconds**.
-   - **`SIM_MODE=realistic`**: Production mode emitting real-world GPS points every **2 to 5 minutes** with smooth client-side glide interpolation.
-   - Toggle switch is prominently available in the top navbar and Admin dashboard for instant live switching.
-4. **Road-Snapped OSRM Polylines with Offline Fallback**:
-   - Seeding calls the public OSRM Routing API (`router.project-osrm.org`) to snap coordinates to real Hyderabad roads.
-   - Offline fallback stored in `server/src/seed/routes.json` ensures 100% offline functionality.
-5. **Tactile Claymorphism Aesthetic**:
-   - 3D volumetric surfaces, soft multi-layered inset and drop shadows, pillowy cards, chunky tactile buttons with physical pressed states, candy-hued clay badges, and custom rotating directional bus markers.
+👉 **[Launch Live Web Application](https://school-way-eosin.vercel.app/)** 👈
+
+</div>
 
 ---
 
-## 🗺️ Seeded Routes & Reference Coordinates
+## 🌟 Overview
 
-### Route A: Uppal &harr; LB Nagar (Inner Ring Road / NH 65)
-- **Forward (`ROUTE-A-FWD`)**: Uppal Ring Road (`17.4058, 78.5591`) &rarr; Ramanthapur X Roads &rarr; Nagole Metro (`17.3718, 78.5590`) &rarr; Alkapuri Colony &rarr; Mansoorabad Junction (`17.3550, 78.5640`) &rarr; Kamineni Hospital &rarr; LB Nagar Circle (`17.3457, 78.5522`).
-- **Reverse (`ROUTE-A-REV`)**: LB Nagar &rarr; Kamineni &rarr; Mansoorabad &rarr; Alkapuri &rarr; Nagole &rarr; Ramanthapur &rarr; Uppal.
-
-### Route B: Ghatkesar &harr; Uppal (Warangal Highway / NH 163)
-- **Forward (`ROUTE-B-FWD`)**: Ghatkesar Bus Station (`17.4510, 78.6855`) &rarr; Pocharam Infosys SEZ (`17.4430, 78.6470`) &rarr; Narapally Junction (`17.4260, 78.6180`) &rarr; Medipally &rarr; Peerzadiguda (`17.4120, 78.5830`) &rarr; Boduppal &rarr; Uppal Ring Road (`17.4058, 78.5591`).
-- **Reverse (`ROUTE-B-REV`)**: Uppal &rarr; Boduppal &rarr; Peerzadiguda &rarr; Medipally &rarr; Narapally &rarr; Pocharam &rarr; Ghatkesar.
+**SchoolWay** bridges the communication and safety gap between school administration, bus drivers, and parents. By combining real-time GPS telemetry, road-snapped navigation algorithms, and role-based portals, SchoolWay replaces outdated paper schedules and frantic phone calls with an intuitive, unified transit intelligence dashboard.
 
 ---
 
-## 🔑 Demo Credentials
+## 📸 User Interface Showcase
 
-Click the **"Demo Logins"** button in the navbar for 1-click instant login without typing passwords, or use these credentials:
+### 1. Real-Time Fleet Radar & City Transit Map
+*Live road-following GPS telemetry streamed via WebSockets across arterial school bus routes with stop milestones, speed gauges, and active fleet statuses.*
 
-| Role | Name | Email | Password | Assigned Vehicle / Stop |
-| :--- | :--- | :--- | :--- | :--- |
-| **👑 Admin** | Principal Ananya Gupta | `admin@schoolway.com` | `admin123` | Complete Fleet Oversight |
-| **👨‍👩‍👦 Parent 1** | Vikram Sharma | `vikram.parent@schoolway.com` | `parent123` | Child: Aarav (Class 6-B) &bull; Bus SW-01 &bull; Stop: Ramanthapur |
-| **👨‍👩‍👦 Parent 2** | Sneha Reddy | `sneha.parent@schoolway.com` | `parent123` | Child: Ananya (Class 4-A) &bull; Bus SW-04 &bull; Stop: Narapally |
-| **🚌 Driver 1** | Rajesh Kumar | `rajesh.driver@schoolway.com` | `driver123` | Bus SW-01 (`TS-08-UB-4122`) &bull; Route A |
-| **🚌 Driver 2** | Venkat Rao | `venkat.driver@schoolway.com` | `driver123` | Bus SW-04 (`TS-07-EA-7184`) &bull; Route B |
-| **🌐 Visitor** | Public Guest | *No Login Required* | *N/A* | Public Live Fleet & Stop Timelines |
+<div align="center">
+  <img src="docs/screenshots/live_fleet_tracking.png" alt="SchoolWay Real-Time Fleet Tracking Map" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
 
----
+<br/>
 
-## 🚀 Getting Started
+### 2. School Bus Lost & Found Operations Desk
+*Centralized lost property management enabling drivers to report items left behind on buses with photos and descriptions, while parents browse and submit verified claim inquiries.*
 
-### Prerequisites
-- **Node.js** (v18+)
-- **MongoDB** running locally on port 27017 (`mongodb://127.0.0.1:27017/schoolway`)
-
-### Installation & Startup
-
-1. **Install Dependencies**:
-   ```bash
-   # In server/
-   cd server
-   npm install
-
-   # In client/
-   cd ../client
-   npm install
-   ```
-
-2. **Seed Database** *(Auto-seeds on first server run, but can be manually triggered)*:
-   ```bash
-   cd server
-   npm run seed
-   ```
-
-3. **Start Server**:
-   ```bash
-   cd server
-   npm start
-   # Server listens on http://localhost:5000 with WebSocket active
-   ```
-
-4. **Start Frontend Client**:
-   ```bash
-   cd client
-   npm run dev
-   # App opens at http://localhost:5173
-   ```
-
-5. **Run Both Concurrently from Root**:
-   ```bash
-   npm run dev
-   ```
+<div align="center">
+  <img src="docs/screenshots/lost_and_found_desk.png" alt="SchoolWay School Bus Lost and Found Desk" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
 
 ---
 
-## ⚙️ Environment Configuration (`server/.env`)
+## 🎯 The 4 Core Challenges SchoolWay Solves
 
-```env
-PORT=5000
-MONGO_URI=mongodb://127.0.0.1:27017/schoolway
-JWT_SECRET=schoolway_super_secret_jwt_key_hyd_2026
-SIM_MODE=demo     # Options: 'demo' (3-second ticks) or 'realistic' (2-5 min intervals)
-CLIENT_URL=http://localhost:5173
+Traditional school bus transportation systems leave parents anxious and school administrators overwhelmed. SchoolWay is purposefully engineered to eliminate the four biggest pain points in student transit:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 THE 4 CORE CHALLENGES                                  │
+├─────────────────────┬─────────────────────┬─────────────────────┬──────────────────────┤
+│  1. NO LIVE GPS     │  2. NO DYNAMIC ETA  │  3. NO LOST & FOUND │  4. NO ATTENDANCE    │
+│  "Where is the bus  │  "When will it      │  "Child forgot bag, │  "Did my child       │
+│   right now?"       │   actually arrive?" │   how do I find it?"│   safely board?"     │
+└─────────────────────┴─────────────────────┴─────────────────────┴──────────────────────┘
+```
+
+### 1. 📍 No Live Location Visibility
+* **The Problem**: Parents and school dispatchers have no way of knowing where buses are physically located once they depart the depot. Families wait by roadsides in harsh weather, while school phone lines get choked with parents asking where their children are.
+* **How SchoolWay Solved It**:
+  * **Continuous 3-Second Telemetry**: Emits high-frequency GPS position ticks over bi-directional WebSocket channels (`bus:location_update`).
+  * **True Road-Snapped Geometry**: Buses navigate along genuine **OSRM road-following polylines** (not unrealistic straight lines between points) following actual highways and city streets.
+  * **Smooth Bearing & Glide Interpolation**: Client-side motion interpolation rotates the directional vehicle marker to match exact road heading and lane movements.
+
+---
+
+### 2. ⏱️ No Dynamic ETAs (Estimated Time of Arrival)
+* **The Problem**: Fixed paper timetables collapse the moment morning traffic congestion or road diversions occur. Parents and students frequently miss the bus or end up waiting for 30+ minutes without knowing whether the vehicle is delayed or has already passed.
+* **How SchoolWay Solved It**:
+  * **Real-Time Distance & Velocity Calculations**: Dynamically computes **stop-by-stop ETAs in minutes** for every upcoming stop along the bus route.
+  * **Proximity Transit Alerts**: Pushes automated notifications when a bus is within ~5 minutes of a student's assigned stop.
+  * **Traffic Delay Advisories**: Automatically detects road slowdowns and broadcasts alert banners to affected parents in real time.
+
+---
+
+### 3. 🎒 No Lost & Found Management
+* **The Problem**: Children routinely leave water bottles, lunchboxes, uniform sweaters, and project kits on school buses. Because there is no communication bridge between drivers, depots, and parents, lost items accumulate in bus yards or end up permanently lost.
+* **How SchoolWay Solved It**:
+  * **Integrated Lost & Found Desk**: A dedicated digital repository accessible to parents, drivers, and school administrators.
+  * **Rapid Driver / Staff Reporting**: Bus drivers and depot staff can immediately log found items with photo uploads or descriptions, bus numbers, seat positions, and timestamps.
+  * **One-Click Parent Claim Flow**: Parents can browse the catalog, inspect item details, view official depot pickup instructions, and submit a **"🙋 This is My Child's Item"** claim inquiry directly to the administration.
+
+---
+
+### 4. 📋 No Real-Time Attendance & Boarding Verification
+* **The Problem**: Once a child walks out the door to catch the bus, parents experience hours of uncertainty not knowing whether their child safely boarded the bus or entered the school gates.
+* **How SchoolWay Solved It**:
+  * **Automated Proximity Boarding**: As the bus dwells at a student's designated stop, the platform verifies proximity and updates student status to `Onboard & Verified`.
+  * **Driver Cockpit Passenger Roster**: Drivers have a digital passenger checklist to manually verify individual student boarding (`boarded`, `dropped`, or `absent`).
+  * **Targeted Parent Notifications**: Parents receive instant boarding confirmations (*"Boarding Confirmed: Aarav Sharma is safely onboard Bus SW-01"*), filtered strictly to their registered children.
+
+---
+
+## 🏗️ Architecture & Data Flow
+
+```mermaid
+graph TD
+    subgraph Frontend ["Frontend Client (React 18)"]
+        UI["Claymorphism UI Components"]
+        MapEngine["Leaflet Map Engine + CartoDB Voyager"]
+        SocketClient["Socket.IO Client"]
+        ParentPortal["Parent Safety Portal"]
+        DriverCockpit["Driver Transit Cockpit"]
+        LostFoundDesk["Lost & Found Desk"]
+    end
+
+    subgraph Backend ["Backend API & Simulator (Node.js / Express)"]
+        REST["Express REST API"]
+        Sim["Autonomous GPS Telemetry Engine"]
+        SocketServer["Socket.IO Server (Room Isolation)"]
+        AuthModule["JWT & bcrypt Authentication"]
+    end
+
+    subgraph Database ["Cloud Database (MongoDB Atlas)"]
+        BusesDB[("Buses Collection")]
+        RoutesDB[("Road Polylines & Stops")]
+        StudentsDB[("Students & Parents")]
+        LostDB[("Lost & Found Catalog")]
+        NotifsDB[("Transit Notifications")]
+    end
+
+    UI -->|REST Endpoints| REST
+    SocketClient <-->|Live Telemetry & Alerts| SocketServer
+    Sim -->|3s Autonomous Ticks| SocketServer
+    REST -->|Mongoose Queries| Database
+    Sim -->|Read & Update State| Database
 ```
 
 ---
 
-## 🏗️ Architecture & Technology Stack
+## 🛠️ Technology Stack
 
-- **Frontend**: React 18, Vite, Vanilla CSS with custom Claymorphism design system, Leaflet with custom CartoDB Voyager raster tiles, Lucide Icons, Socket.IO Client.
-- **Backend**: Node.js, Express, Socket.IO, Mongoose, JWT, bcryptjs.
-- **Simulator**: Server-internal background loop executing polyline traversal, dwell scheduling, ETA recalculations, and room-based WebSocket broadcasts (`bus:<id>` and `fleet:all`).
-- **Data Snapping**: Open Source Routing Machine (OSRM) driving profile with cached fallback.
+### Frontend
+| Technology | Role |
+| :--- | :--- |
+| **React 18** | Declarative component architecture with modern hooks (`useState`, `useEffect`, `useContext`, `useRef`, `useCallback`) |
+| **Vite 5** | High-performance build tool and hot module replacement |
+| **Leaflet 1.9** | Interactive mapping engine with smooth tile rendering |
+| **CartoDB Voyager** | Clean, high-legibility cartographic vector/raster tile basemap |
+| **Vanilla CSS** | Bespoke **Tactile Claymorphism** design system with 3D volumetric depth, soft pillowy cards, multi-layered inset shadows, and micro-interactions |
+| **Socket.IO Client** | Bi-directional, event-driven WebSocket communication |
+| **Lucide React** | Consistent and crisp vector icons |
 
----
+### Backend
+| Technology | Role |
+| :--- | :--- |
+| **Node.js (v18+)** | High-throughput asynchronous JavaScript runtime |
+| **Express 4.19** | RESTful API routing, error handling, and middleware |
+| **Socket.IO 4.7** | Real-time WebSocket server featuring room-segregated broadcasts (`fleet:all`, `bus:<id>`, `parent:<id>`) |
+| **OSRM Engine** | Open Source Routing Machine integration for realistic driving geometry and route snapping |
+| **JWT & bcryptjs** | Secure token-based session management and cryptographic password hashing |
 
-## ☁️ Deployment Guide (Render & Vercel)
-
-### Option 1: Render (Backend) + Vercel (Frontend) [Recommended]
-
-#### 1. Deploy Backend on Render:
-1. Go to [render.com](https://render.com) & click **New +** &rarr; **Web Service**.
-2. Connect your GitHub repository: `https://github.com/uppalanchiabhiram235235-hue/SchoolWay.git`.
-3. Configure the service:
-   - **Name**: `schoolway-backend`
-   - **Region**: Singapore (or nearest)
-   - **Branch**: `main`
-   - **Root Directory**: leave blank (or `server`)
-   - **Build Command**: `npm install && npm --prefix server install`
-   - **Start Command**: `node server/src/index.js`
-4. Set Environment Variables in Render:
-   - `NODE_ENV`: `production`
-   - `PORT`: `10000`
-   - `MONGO_URI`: `mongodb+srv://<user>:<password>@cluster.mongodb.net/schoolway?retryWrites=true&w=majority`
-   - `JWT_SECRET`: `your_random_secret_key_here`
-   - `SIM_MODE`: `demo`
-   - `CLIENT_URL`: `*`
-5. Click **Deploy Web Service** and copy your backend URL (e.g. `https://schoolway-backend.onrender.com`).
-
-#### 2. Deploy Frontend on Vercel:
-1. Go to [vercel.com](https://vercel.com) & click **Add New** &rarr; **Project**.
-2. Import the `SchoolWay` GitHub repository.
-3. Configure settings:
-   - **Framework Preset**: `Vite`
-   - **Root Directory**: `client` (or `./`)
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-4. Add Environment Variable:
-   - `VITE_API_URL`: `https://schoolway-backend.onrender.com` (your Render URL from step 1)
-5. Click **Deploy**!
+### Database
+| Technology | Role |
+| :--- | :--- |
+| **MongoDB Atlas** | High-availability cloud NoSQL database cluster |
+| **Mongoose 8** | Schema validation, relationship modeling, and geospatial indexing |
 
 ---
 
-### Option 2: Full-Stack on Render (Single Web Service)
-1. In Render, select **Blueprint** or **Web Service**.
-2. Build command: `npm run build`
-3. Start command: `npm start`
-4. The Express server automatically serves both the API/WebSocket and the built Vite React frontend (`client/dist`).
+## 🗺️ Transit Corridors & Stops
 
+SchoolWay models high-traffic school bus routes connecting regional communities to the central campus depot (`17.4560, 78.6830`):
+
+| Route Code | Corridor | Major Stops & Milestones |
+| :--- | :--- | :--- |
+| **ROUTE-BHONIGIR** | Ghatkesar &harr; Bhongir (NH 163) | Ghatkesar RTC Stand &bull; Pagidipalli &bull; Kondamadugu &bull; Bibinagar AIIMS &bull; Bhongir Fort & Bypass |
+| **ROUTE-UPPAL** | Ghatkesar &harr; Uppal (Warangal Highway) | Pocharam Infosys SEZ &bull; Narapally Junction &bull; Medipally &bull; Peerzadiguda &bull; Boduppal &bull; Uppal Metro |
+| **ROUTE-ECIL** | Ghatkesar &harr; ECIL (Keesara Road) | Ghatkesar ORR &bull; Keesara X Roads &bull; Rampally &bull; Nagaram Junction &bull; Kushaiguda &bull; ECIL Depot |
+
+---
+
+## 💻 Local Development Setup
+
+To run the project locally on your machine:
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/uppalanchiabhiram235235-hue/SchoolWay.git
+cd SchoolWay
+```
+
+### 2. Install Dependencies
+```bash
+# Install root, server, and client dependencies
+npm install
+npm --prefix server install
+npm --prefix client install
+```
+
+### 3. Environment Variables
+Create a `.env` file in the `server` directory:
+```env
+PORT=5000
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/schoolway?retryWrites=true&w=majority
+JWT_SECRET=your_secret_jwt_key
+SIM_MODE=demo
+CLIENT_URL=http://localhost:5173
+```
+
+### 4. Seed Database & Start
+```bash
+# Seed initial routes, buses, and lost & found data
+npm --prefix server run seed
+
+# Start both backend and frontend development servers concurrently
+npm run dev
+```
+
+* **Frontend**: `http://localhost:5173`
+* **Backend API**: `http://localhost:5000`
+
+---
+
+## 🌐 Live Web Application
+
+The live frontend application is hosted on Vercel:  
+👉 **[https://school-way-eosin.vercel.app/](https://school-way-eosin.vercel.app/)**
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE). Built for student transit safety and modern school fleet operations.

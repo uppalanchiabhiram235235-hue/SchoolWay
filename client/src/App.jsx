@@ -10,10 +10,18 @@ import LostAndFound from './pages/LostAndFound';
 
 function MainApp() {
   const { role } = useAuth();
-  const [activeTab, setActiveTab] = useState('live');
+  const [activeTab, setActiveTab] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    return hash || 'live';
+  });
 
-  // Sync tab with role on login
+  // Sync tab with role on login unless explicit hash is provided
   useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      setActiveTab(hash);
+      return;
+    }
     if (role === 'admin') setActiveTab('admin');
     else if (role === 'driver') setActiveTab('driver');
     else if (role === 'parent') setActiveTab('parent');
