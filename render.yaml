@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: schoolway-backend
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install && npm --prefix server install && npm --prefix client install && npm --prefix client run build
+    startCommand: node server/src/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SIM_MODE
+        value: demo
+      - key: CLIENT_URL
+        value: "*"
