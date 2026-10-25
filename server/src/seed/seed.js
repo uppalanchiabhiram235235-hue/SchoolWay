@@ -14,6 +14,7 @@ const GpsPoint = require('../models/GpsPoint');
 const Notification = require('../models/Notification');
 const connectDB = require('../config/db');
 const { generateAllRoutes } = require('./generateRoutes');
+const { seedLostItemsIfEmpty } = require('./seedLostItems');
 
 // Calculate heading between two points
 function calculateHeading(p1, p2) {
@@ -401,6 +402,8 @@ async function seedDatabase(forceClean = true) {
         timestamp: new Date(Date.now() - 1000 * 60 * 2)
       }
     ]);
+
+    await seedLostItemsIfEmpty();
 
     console.log('\n============================================================');
     console.log('   🏫 SCHOOLWAY - HYDERABAD FLEET SEEDING COMPLETE!   ');

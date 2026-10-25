@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Layers, Crosshair, Navigation, MapPin, School, Compass, ShieldAlert } from 'lucide-react';
 import { apiUrl } from '../config/api';
+import { FORMAL_TEST_ROUTES } from '../data/formalTestData';
 
 const SCHOOL_LOCATION = {
   lat: 17.4560,
@@ -116,81 +117,94 @@ export default function MapView({
 
     schoolMarkerRef.current = schoolMarker;
 
-    // 3. Fetch and Draw Road Polylines & Stops
+    // 3. Render Road Polylines & Stops with instant fallback
+    const renderRoutes = (routesToDraw) => {
+      if (!Array.isArray(routesToDraw) || !mapInstanceRef.current) return;
+      routesDataRef.current = routesToDraw;
+
+      routesToDraw.forEach(route => {
+        const baseCode = (route.code || '').replace('-FWD', '').replace('-REV', '');
+        if (polylineLayersRef.current[baseCode]) return;
+
+        let routeColor = route.color || '#10b981';
+        if (route.code?.includes('UPPAL')) routeColor = '#6366f1';
+        if (route.code?.includes('ECIL')) routeColor = '#f59e0b';
+
+        const latLngs = (route.polyline || []).map(p => [p.lat, p.lng]);
+        if (latLngs.length === 0) return;
+
+        // Road glow line
+        const glowLine = L.polyline(latLngs, {
+          color: routeColor,
+          weight: 8,
+          opacity: 0.3,
+          smoothFactor: 1
+        }).addTo(map);
+
+        // Road core line
+        const coreLine = L.polyline(latLngs, {
+          color: routeColor,
+          weight: 4,
+          opacity: 0.9,
+          smoothFactor: 1
+        }).addTo(map);
+
+        polylineLayersRef.current[baseCode] = { glowLine, coreLine, color: routeColor };
+
+        // Stops pins
+        (route.stops || []).forEach((stop, index) => {
+          const stopKey = `${baseCode}_${stop.stopId}`;
+          if (stopMarkersRef.current[stopKey]) return;
+
+          const stopLat = stop.coordinates?.lat ?? stop.lat;
+          const stopLng = stop.coordinates?.lng ?? stop.lng;
+          if (typeof stopLat !== 'number' || typeof stopLng !== 'number') return;
+
+          const isChildStop = highlightStopId === stop.stopId;
+          const isSchoolStop = stopLat === SCHOOL_LOCATION.lat && stopLng === SCHOOL_LOCATION.lng;
+
+          if (isSchoolStop) return; // already represented by the central school beacon
+
+          const stopHtml = `
+            <div class="clay-stop-marker ${isChildStop ? 'parent-child-stop' : ''}" id="marker-${stop.stopId}">
+              ${index + 1}
+            </div>
+          `;
+
+          const icon = L.divIcon({
+            html: stopHtml,
+            className: 'custom-stop-div-icon',
+            iconSize: [26, 26],
+            iconAnchor: [13, 13]
+          });
+
+          const marker = L.marker([stopLat, stopLng], { icon })
+            .addTo(map)
+            .bindTooltip(`
+              <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px 6px;">
+                <strong style="color: #0f172a; font-size: 12px;">${stop.name}</strong><br/>
+                <span style="color: #4f46e5; font-size: 11px; font-weight: 700;">Stop #${stop.sequence || index + 1}</span> &bull; 
+                <small style="color: #64748b;">${stop.landmark || route.name}</small>
+              </div>
+            `, { direction: 'top', offset: [0, -10] });
+
+          stopMarkersRef.current[stopKey] = marker;
+        });
+      });
+    };
+
+    // Draw instant formal test routes first so map is immediately populated
+    renderRoutes(FORMAL_TEST_ROUTES);
+
+    // Then attempt API fetch to get live/Atlas geometry
     fetch(apiUrl('/api/routes'))
       .then(r => r.json())
       .then(routes => {
-        if (!Array.isArray(routes) || !mapInstanceRef.current) return;
-        routesDataRef.current = routes;
-
-        routes.forEach(route => {
-          // Avoid duplicate lines for reverse pairs
-          const baseCode = route.code.replace('-FWD', '').replace('-REV', '');
-          if (polylineLayersRef.current[baseCode]) return;
-
-          let routeColor = '#10b981'; // Bhongir: emerald
-          if (route.code.includes('UPPAL')) routeColor = '#6366f1'; // Uppal: indigo
-          if (route.code.includes('ECIL')) routeColor = '#f59e0b'; // ECIL: amber
-
-          const latLngs = (route.polyline || []).map(p => [p.lat, p.lng]);
-          if (latLngs.length === 0) return;
-
-          // Road glow line
-          const glowLine = L.polyline(latLngs, {
-            color: routeColor,
-            weight: 8,
-            opacity: 0.3,
-            smoothFactor: 1
-          }).addTo(map);
-
-          // Road core line
-          const coreLine = L.polyline(latLngs, {
-            color: routeColor,
-            weight: 4,
-            opacity: 0.9,
-            smoothFactor: 1
-          }).addTo(map);
-
-          polylineLayersRef.current[baseCode] = { glowLine, coreLine, color: routeColor };
-
-          // Stops pins
-          (route.stops || []).forEach((stop, index) => {
-            const stopKey = `${baseCode}_${stop.stopId}`;
-            if (stopMarkersRef.current[stopKey]) return;
-
-            const isChildStop = highlightStopId === stop.stopId;
-            const isSchoolStop = stop.coordinates.lat === SCHOOL_LOCATION.lat && stop.coordinates.lng === SCHOOL_LOCATION.lng;
-
-            if (isSchoolStop) return; // already represented by the prominent school beacon
-
-            const stopHtml = `
-              <div class="clay-stop-marker ${isChildStop ? 'parent-child-stop' : ''}" id="marker-${stop.stopId}">
-                ${index + 1}
-              </div>
-            `;
-
-            const icon = L.divIcon({
-              html: stopHtml,
-              className: 'custom-stop-div-icon',
-              iconSize: [26, 26],
-              iconAnchor: [13, 13]
-            });
-
-            const marker = L.marker([stop.coordinates.lat, stop.coordinates.lng], { icon })
-              .addTo(map)
-              .bindTooltip(`
-                <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px 6px;">
-                  <strong style="color: #0f172a; font-size: 12px;">${stop.name}</strong><br/>
-                  <span style="color: #4f46e5; font-size: 11px; font-weight: 700;">Stop #${stop.sequence || index + 1}</span> &bull; 
-                  <small style="color: #64748b;">${stop.landmark || route.name}</small>
-                </div>
-              `, { direction: 'top', offset: [0, -10] });
-
-            stopMarkersRef.current[stopKey] = marker;
-          });
-        });
+        if (Array.isArray(routes) && routes.length > 0) {
+          renderRoutes(routes);
+        }
       })
-      .catch(err => console.error('Error fetching routes for map:', err));
+      .catch(err => console.log('Using default formal routes for map.'));
 
     return () => {
       clearTimeout(t1);

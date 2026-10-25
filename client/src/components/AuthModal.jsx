@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { X, Mail, Lock, User, Phone, Eye, EyeOff, Shield, Bus, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { FORMAL_TEST_ACCOUNTS } from '../data/formalTestData';
+import { X, Mail, Lock, User, Phone, Eye, EyeOff, Shield, Bus, CheckCircle2, AlertCircle, ArrowRight, Zap } from 'lucide-react';
 
 export default function AuthModal({ isOpen, onClose, initialTab = 'login', onAuthSuccess }) {
-  const { loginWithCredentials, register } = useAuth();
+  const { loginWithCredentials, loginWithFormalAccount, register } = useAuth();
   const [activeTab, setActiveTab] = useState(initialTab); // 'login' or 'register'
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -181,11 +182,60 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login', onAut
         {/* Body Content */}
         <div style={{ padding: '0 24px 24px', maxHeight: '72vh', overflowY: 'auto' }}>
           {activeTab === 'login' ? (
-            <form onSubmit={handleLogin} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
-                  Email Address
-                </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Quick 1-Click Formal Test Logins */}
+              <div style={{ padding: '12px 14px', background: 'rgba(99, 102, 241, 0.08)', borderRadius: '14px', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.76rem', fontWeight: '800', color: '#a5b4fc', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Zap size={14} style={{ color: '#fbbf24' }} /> Formal Test Logins (1-Click)
+                  </span>
+                  <span style={{ fontSize: '0.68rem', color: '#94a3b8', background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px' }}>Instant Access</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {FORMAL_TEST_ACCOUNTS.map((acc) => (
+                    <button
+                      key={acc.role}
+                      type="button"
+                      onClick={() => {
+                        if (loginWithFormalAccount) {
+                          loginWithFormalAccount(acc);
+                        }
+                        if (onAuthSuccess) onAuthSuccess(acc.role);
+                        onClose();
+                      }}
+                      className="clay-btn clay-btn-dark"
+                      style={{ 
+                        padding: '8px 12px', 
+                        justifyContent: 'space-between', 
+                        textAlign: 'left',
+                        background: 'rgba(15, 23, 42, 0.75)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '1rem' }}>{acc.role === 'admin' ? '👑' : acc.role === 'driver' ? '🚌' : '👨‍👩‍👦'}</span>
+                        <div>
+                          <div style={{ fontSize: '0.82rem', fontWeight: '700', color: '#ffffff' }}>{acc.roleLabel}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{acc.description}</div>
+                        </div>
+                      </div>
+                      <ArrowRight size={14} style={{ color: '#818cf8', opacity: 0.8 }} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0' }}>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }}></div>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Or Sign In With Email</span>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }}></div>
+              </div>
+
+              <form onSubmit={handleLogin} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
+                    Email Address
+                  </label>
                 <div className="auth-input-wrapper">
                   <Mail size={16} className="auth-input-icon" />
                   <input 
@@ -239,6 +289,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login', onAut
                 {!loading && <ArrowRight size={16} />}
               </button>
             </form>
+          </div>
           ) : (
             <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>

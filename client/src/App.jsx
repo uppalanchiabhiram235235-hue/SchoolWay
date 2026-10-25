@@ -11,15 +11,19 @@ import LostAndFound from './pages/LostAndFound';
 function MainApp() {
   const { role } = useAuth();
   const [activeTab, setActiveTab] = useState(() => {
-    const hash = window.location.hash.replace('#', '');
-    return hash || 'live';
+    const hash = window.location.hash.replace(/^#\/?/, '').trim();
+    if (hash === 'lost_found' || hash === 'lost-found') return 'lost_found';
+    if (hash === 'parent') return 'parent';
+    if (hash === 'driver') return 'driver';
+    if (hash === 'admin') return 'admin';
+    return 'live';
   });
 
   // Sync tab with role on login unless explicit hash is provided
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (hash) {
-      setActiveTab(hash);
+    const hash = window.location.hash.replace(/^#\/?/, '').trim();
+    if (hash === 'lost_found' || hash === 'lost-found') {
+      setActiveTab('lost_found');
       return;
     }
     if (role === 'admin') setActiveTab('admin');

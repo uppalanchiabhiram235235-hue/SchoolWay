@@ -218,9 +218,3 @@ npm run dev
 
 The live frontend application is hosted on Vercel:  
 👉 **[https://school-way-eosin.vercel.app/](https://school-way-eosin.vercel.app/)**
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE). Built for student transit safety and modern school fleet operations.

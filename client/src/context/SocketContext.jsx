@@ -2,13 +2,18 @@ import React, { createContext, useContext, useEffect, useState, useRef, useCallb
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { apiUrl, API_BASE_URL } from '../config/api';
+import { FORMAL_TEST_BUSES } from '../data/formalTestData';
 
 const SocketContext = createContext(null);
 
 export function SocketProvider({ children }) {
   const { user, token } = useAuth();
-  const [buses, setBuses] = useState([]);
-  const [busesMap, setBusesMap] = useState({});
+  const [buses, setBuses] = useState(FORMAL_TEST_BUSES);
+  const [busesMap, setBusesMap] = useState(() => {
+    const map = {};
+    FORMAL_TEST_BUSES.forEach(b => { map[b._id] = b; });
+    return map;
+  });
   const [notifications, setNotifications] = useState([]);
   const [simMode, setSimMode] = useState('demo');
   const [connected, setConnected] = useState(false);
@@ -50,10 +55,12 @@ export function SocketProvider({ children }) {
 
       if (busRes.ok) {
         const busData = await busRes.json();
-        setBuses(busData);
-        const map = {};
-        busData.forEach(b => { map[b._id] = b; });
-        setBusesMap(map);
+        if (Array.isArray(busData) && busData.length > 0) {
+          setBuses(busData);
+          const map = {};
+          busData.forEach(b => { map[b._id] = b; });
+          setBusesMap(map);
+        }
       }
 
       if (simRes.ok) {
@@ -61,7 +68,7 @@ export function SocketProvider({ children }) {
         setSimMode(simData.mode || 'demo');
       }
     } catch (err) {
-      console.error('[SocketContext] Initial fetch error:', err.message);
+      console.error('[SocketContext] Initial fetch error, using formal test buses:', err.message);
     }
   }, []);
 
@@ -73,14 +80,34 @@ export function SocketProvider({ children }) {
       })
         .then(r => r.json())
         .then(data => {
-          if (Array.isArray(data)) {
+          if (Array.isArray(data) && data.length > 0) {
             setParentStudents(data);
             parentStudentsRef.current = data;
+          } else if (user?.students && user.students.length > 0) {
+            setParentStudents(user.students);
+            parentStudentsRef.current = user.students;
+          } else {
+            // Default formal test student for parent
+            const defaultStudent = [{
+              _id: 'student_test_01',
+              name: 'Aarav Sharma',
+              grade: 'Class 6-B',
+              busNumber: 'SW-01',
+              stopId: 'ST-BG4',
+              stopName: 'Bibinagar AIIMS Campus Stop',
+              status: 'boarded'
+            }];
+            setParentStudents(defaultStudent);
+            parentStudentsRef.current = defaultStudent;
           }
           fetchNotifications();
         })
         .catch(err => {
           console.error('[SocketContext] Error fetching parent students:', err);
+          if (user?.students) {
+            setParentStudents(user.students);
+            parentStudentsRef.current = user.students;
+          }
           fetchNotifications();
         });
     } else {

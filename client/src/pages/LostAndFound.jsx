@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { apiUrl } from '../config/api';
+import { FORMAL_TEST_LOST_ITEMS } from '../data/formalTestData';
 import { 
   PackageSearch, Plus, Search, Filter, Camera, Upload, Trash2, 
   CheckCircle, Clock, MapPin, Bus, User, Phone, X, AlertCircle, 
@@ -27,8 +28,8 @@ export default function LostAndFound({ onTabChange }) {
   const { user, role, token } = useAuth();
   const { socket, parentStudents } = useSocket();
 
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState(FORMAL_TEST_LOST_ITEMS);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedBus, setSelectedBus] = useState('All');
@@ -62,10 +63,10 @@ export default function LostAndFound({ onTabChange }) {
 
   const canManage = role === 'admin' || role === 'driver';
 
-  // 1. Fetch lost items from backend
+  // 1. Fetch lost items from backend with formal fallback
   const fetchItems = async () => {
     try {
-      setLoading(true);
+      if (items.length === 0) setLoading(true);
       const params = new URLSearchParams();
       if (selectedCategory !== 'All') params.append('category', selectedCategory);
       if (selectedBus !== 'All') params.append('busNumber', selectedBus);
@@ -75,13 +76,41 @@ export default function LostAndFound({ onTabChange }) {
       const res = await fetch(apiUrl(`/api/lost-items?${params.toString()}`));
       if (res.ok) {
         const data = await res.json();
-        setItems(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setItems(data);
+          return;
+        }
       }
+      // If backend returns empty or error, filter formal test items locally
+      applyLocalFiltering();
     } catch (err) {
-      console.error('[LostAndFound] Error fetching items:', err);
+      console.log('[LostAndFound] Using formal test items catalog');
+      applyLocalFiltering();
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyLocalFiltering = () => {
+    let result = [...FORMAL_TEST_LOST_ITEMS];
+    if (selectedCategory !== 'All') {
+      result = result.filter(i => i.category === selectedCategory);
+    }
+    if (selectedBus !== 'All') {
+      result = result.filter(i => i.busNumber === selectedBus);
+    }
+    if (statusFilter !== 'All') {
+      result = result.filter(i => i.status === statusFilter);
+    }
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter(i => 
+        i.title.toLowerCase().includes(q) || 
+        i.description.toLowerCase().includes(q) ||
+        (i.locationFound && i.locationFound.toLowerCase().includes(q))
+      );
+    }
+    setItems(result);
   };
 
   useEffect(() => {
