@@ -32,12 +32,6 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('schoolway_token');
   };
 
-  const loginWithFormalAccount = (acc) => {
-    if (!acc) return null;
-    login(acc.user, acc.token);
-    return acc.user;
-  };
-
   const loginWithCredentials = async (email, password) => {
     try {
       const res = await fetch(apiUrl('/api/auth/login'), {
@@ -88,7 +82,6 @@ export function AuthProvider({ children }) {
       login, 
       logout, 
       loginWithCredentials, 
-      loginWithFormalAccount,
       register 
     }}>
       {children}
